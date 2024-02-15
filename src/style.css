@@ -1,0 +1,18 @@
+/*--- BASIC SETUP ---*/
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 10vh;
+}
+
+canvas {
+  border: 0.5rem solid aqua;
+  height: 50rem;
+  width: 50rem;
+}
