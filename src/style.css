@@ -11,8 +11,11 @@ html {
   scroll-padding-top: 10vh;
 }
 
+body {
+  display: flex;
+  justify-content: center;
+}
+
 canvas {
-  border: 0.5rem solid aqua;
-  height: 50rem;
-  width: 50rem;
+  border: 1px solid black;
 }

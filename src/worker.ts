@@ -12,20 +12,16 @@ onmessage = (e) => {
   }
 
   if (e.data[0] === "setUpCanvas") {
-    const viewport = e.data[2];
-    console.log(viewport);
 
     // define canvas from main to offscreen
     canvas = e.data[1];
     ctx = canvas.getContext("2d");
 
-    canvas.width = viewport[0] * viewport[2];
-    canvas.height = viewport[1] * viewport[2];
-    console.log(canvas.width, canvas.height);
-    ctx.scale(viewport[2], viewport[2]);
+    canvas.width = 500;
+    canvas.height = 500;
     ctx.textBaseline = "top";
 
-    ctx.fillText("a", 10, 10);
+    ctx.fillText("a", 0, 0);
   }
 };
 
