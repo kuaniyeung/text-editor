@@ -1,30 +1,41 @@
-// let buffer = new Array(50).fill("_");
-// let gap_size = 10;
-// let gap_left = 0;
-// let gap_right = gap_size - gap_left - 1;
-// let size = 10;
+let size = 50;
+let buffer = new Array(size);
+
+let gap_size = 10;
+let gap_left = 0;
+let gap_right = gap_size - gap_left - 1;
+
 let ctx;
 let canvas;
+let eventKey;
+let page;
 
 // Worker messages
 onmessage = (e) => {
   if (e.data[0] === "keydown") {
+    eventKey = e.data[1];
+
+    console.log(eventKey);
   }
 
   if (e.data[0] === "setUpCanvas") {
-
     // define canvas from main to offscreen
     canvas = e.data[1];
     ctx = canvas.getContext("2d");
 
+    // canvas size
     canvas.width = 500;
     canvas.height = 500;
+
+    // font style
+    ctx.font = "24px monospace";
     ctx.textBaseline = "top";
 
-    ctx.fillText("a", 0, 0);
+    // ctx.fillText("abcde", 0, 0);
   }
 };
 
+console.log(buffer);
 // Function that is used to grow the gap at index position and return the array
 // function grow(k: number, position: number) {
 //   let a = buffer.slice(position, size);

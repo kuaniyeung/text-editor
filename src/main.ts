@@ -6,6 +6,6 @@ const canvas = document.body.appendChild(document.createElement("canvas"));
 canvas.id = "canvas"
 const context = canvas.transferControlToOffscreen();
 
-worker.postMessage(["setUpCanvas", context, null], [context]);
+worker.postMessage(["setUpCanvas", context], [context]);
 
-addEventListener("keydown", (e) => worker.postMessage([e.type, e.key, e.code]));
+addEventListener("keydown", (e) => worker.postMessage([e.type, e.key]));
