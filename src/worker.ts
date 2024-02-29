@@ -58,7 +58,6 @@ const remove = () => {
 
 const display = () => {
   const span = 24 / (10 / 6);
-  ctx.fillStyle = "#" + Math.floor(Math.random() * 16777215).toString(16);
 
   // clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.width);
@@ -88,7 +87,7 @@ onmessage = (e) => {
     canvas.height = 500;
 
     // font style
-    ctx.font = "24px jetbrains-mono";
+    ctx.font = "24px monospace";
     ctx.textBaseline = "top";
 
     // ctx.fillText("abcde", 0, 0);
@@ -127,5 +126,5 @@ onmessage = (e) => {
     // console.log(eventKey);
   }
   display();
-  console.log(buffer, gap_left, gap_right, gap_size);
+  // console.log(buffer, gap_left, gap_right, gap_size);
 };
