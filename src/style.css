@@ -20,4 +20,5 @@ body {
 
 canvas {
   border: 2px solid black;
+  padding: 1px;
 }
