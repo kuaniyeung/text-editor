@@ -5,14 +5,15 @@ let gap_size = 10;
 let gap_left = 0;
 let gap_right = gap_size - gap_left - 1;
 
-let aBuffer;
-let bBuffer;
-let aLines;
-let bLines;
+let aBuffer: Array<string | null | undefined>;
+let bBuffer: Array<string | null | undefined>;
+let aLines: Array<string>;
+let bLines: Array<string>;
 
 let ctx: CanvasRenderingContext2D;
 let canvas: HTMLCanvasElement;
 let canvasSize = 30;
+let canvasPadding = 1;
 let fontSize = 24;
 let fontWidth = fontSize / (10 / 6);
 let fontFamily = "monospace";
@@ -45,12 +46,25 @@ const moveGap = (direction: string) => {
     buffer[gap_right + 1] = buffer[gap_left];
     buffer[gap_left] = undefined;
   } else if (direction === "right") {
+    if (gap_right === gap_size) return;
+
     gap_left++;
     gap_right++;
     buffer[gap_left - 1] = buffer[gap_right];
     buffer[gap_right] = undefined;
   } else if (direction === "up") {
+    if (gap_left < canvasSize) return;
+
+    gap_left -= canvasSize;
+    gap_right -= canvasSize;
+    buffer.splice(
+      gap_right + 1,
+      0,
+      buffer.slice(gap_left, gap_left + canvasSize)
+    );
+    // buffer.splice();
   } else if (direction === "down") {
+    if (bLines[bLines.length - 1].length === 0) return;
   }
 };
 
@@ -72,44 +86,28 @@ const remove = () => {
   buffer[gap_left] = undefined;
 };
 
-const splitArrayByNull = (arr: Array<string | null>) => {
+const handleLineBreak = (arr: Array<string | null | undefined>) => {
   const result = [];
   let segment = [];
 
-  // for (let i = 0; i < arr.length; i++) {
-  //   if (arr[i] === null) {
-  //     if (segment.length > 0) {
-  //       result.push(segment.join(""));
-  //       segment = [];
-  //     } else {
-  //       result.push("");
-  //     }
-  //   } else {
-  //     segment.push(arr[i]);
-  //   }
-  // }
-
-  // // Add the last segment if it's not empty
-  // if (segment.length > 0) {
-  //   result.push(segment.join(""));
-  // } else if (arr[arr.length - 1] === null) {
-  //   result.push("");
-  // }
-
   for (let i = 0; i < arr.length; i++) {
+    // null represent new line entry by "Enter"
     if (arr[i] === null) {
       if (segment.length > 0) {
-        if (segment.length <= 30) {
-          result.push(segment.join("")); // Join the segment into a string
+        // If segment does not exceed canavas size, join the segment into a string
+        if (segment.length <= canvasSize) {
+          result.push(segment.join(""));
         } else {
-          // Split the segment into multiple segments of maximum 30 elements each
-          for (let j = 0; j < segment.length; j += 30) {
-            result.push(segment.slice(j, j + 30).join(""));
+          // If segment longer than canvas size, handle line break for text wrapping by spliting the segment into multiple segments of maximum canvas size elements each
+          for (let j = 0; j < segment.length; j += canvasSize) {
+            result.push(segment.slice(j, j + canvasSize).join(""));
           }
         }
+
+        // Reset segment after pushing to result
         segment = [];
       } else {
-        // If segment is already empty (i.e., consecutive nulls), add an empty string
+        // If segment is already empty (i.e., consecutive nulls), add an empty string for new line
         result.push("");
       }
     } else {
@@ -119,23 +117,28 @@ const splitArrayByNull = (arr: Array<string | null>) => {
 
   // Add the last segment if it's not empty
   if (segment.length > 0) {
-    if (segment.length <= 30) {
-      result.push(segment.join("")); // Join the last segment into a string
+    // If last segment shorter than canvas size, join segment into string
+    if (segment.length <= canvasSize) {
+      result.push(segment.join(""));
     } else {
       // Split the last segment into multiple segments of maximum 30 elements each
-      for (let j = 0; j < segment.length; j += 30) {
-        result.push(segment.slice(j, j + 30).join(""));
+      for (let j = 0; j < segment.length; j += canvasSize) {
+        result.push(segment.slice(j, j + canvasSize).join(""));
       }
     }
-  } else if (arr[arr.length - 1] === null) {
+  }
+
+  // If the last element of the result is null, add an empty string
+  if (arr[arr.length - 1] === null && result.length > 0) {
+    result.push("");
+  }
+
+  // If the last segment in the result is exactly 30 characters long, add an empty string
+  if (result.length > 0 && result[result.length - 1].length === canvasSize) {
     result.push("");
   }
 
   return result;
-};
-
-const handleLineBreak = () => {
-  // line break when any lines reaches canvas size
 };
 
 const display = () => {
@@ -152,8 +155,9 @@ const display = () => {
 
   // Render value before cursor
 
-  aLines = splitArrayByNull(aBuffer);
-  let yPositionOfA = 1; // 1px padding top
+  aLines = handleLineBreak(aBuffer);
+  const lastALine = aLines[aLines.length - 1];
+  let yPositionOfA = canvasPadding;
 
   for (let i = 0; i < aLines.length; i++) {
     ctx.fillText(aLines[i], 0, yPositionOfA);
@@ -171,16 +175,40 @@ const display = () => {
 
   // Render value after cursor
 
-  bLines = splitArrayByNull(bBuffer);
+  if (bBuffer.length === 0) return;
+
+  // Account for first B line's length according to last A line
+
+  // If first line is not a new line and is longer than the segment until next new line
+  if (
+    bBuffer.slice(0, bBuffer.indexOf(null)).length >
+      canvasSize - lastALine.length &&
+    bBuffer[0] !== null
+  ) {
+    const firstBLine = bBuffer
+      .map((e, i) => {
+        if (i < canvasSize - lastALine.length) {
+          return e;
+        }
+      })
+      .join("");
+
+    bLines = handleLineBreak(bBuffer.slice(canvasSize - lastALine.length));
+    bLines.unshift(firstBLine);
+  } else {
+    bLines = handleLineBreak(bBuffer);
+  }
+
+  // Modify first b line to only fit rest of canavas size after last a line
 
   // console.log("aLines: ", aLines);
   // console.log("aLines length: ", aLines.length);
+  // console.log("Last aLine: ", lastALine);
   // console.log("bLines: ", bLines);
   // console.log("bLines length: ", bLines.length);
   // console.log("cursorPositionX: ", cursorPositionX);
   // console.log("cursorPositionY: ", cursorPositionY);
 
-  if (bBuffer.length === 0) return;
   let yPositionOfB = cursorPositionY;
 
   for (let i = 0; i < bLines.length; i++) {
@@ -201,8 +229,8 @@ onmessage = (e) => {
     ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     // canvas size
-    canvas.width = fontWidth * canvasSize + 2; // 2px padding
-    canvas.height = fontWidth * canvasSize + 2; // 2px padding
+    canvas.width = fontWidth * canvasSize + canvasPadding * 2;
+    canvas.height = fontWidth * canvasSize + canvasPadding * 2;
 
     // font style
     ctx.font = fontSize + "px " + fontFamily;
@@ -220,8 +248,17 @@ onmessage = (e) => {
       case "Tab":
       case "Fn":
       case "CapsLock":
+      case "Delete":
+      case "End":
+      case "Home":
+      case "PageUp":
+      case "PageDown":
+        break;
       case "ArrowUp":
+        moveGap("up");
+        break;
       case "ArrowDown":
+        moveGap("down");
         break;
       case "ArrowLeft":
         moveGap("left");
@@ -239,8 +276,60 @@ onmessage = (e) => {
         insert(eventKey);
     }
 
-    // console.log(eventKey);
+    console.log(eventKey);
   }
   display();
   // console.log(buffer, gap_left, gap_right, gap_size);
 };
+
+let test: Array<string | undefined> = [
+  "d",
+  "s",
+  "f",
+  "d",
+  "f",
+  "h",
+  "k",
+  "s",
+  "j",
+  "h",
+  "f",
+  "k",
+  "s",
+  "j",
+  "f",
+  "h",
+  "f",
+  "d",
+  "f",
+  "j",
+  "l",
+  "s",
+  "a",
+  "k",
+  "f",
+  "d",
+  "l",
+  "s",
+  "k",
+  "j",
+  "f",
+  "l",
+  "d",
+  "k",
+  "s",
+  "a",
+  "j",
+  undefined,
+  undefined,
+  undefined,
+];
+console.log("test: ", test);
+
+let move = test.slice(7, 7 + 30);
+console.log("move: ", move);
+
+test.splice(9 + 1, 0, ...move);
+test.splice(7, 30);
+
+// console.log(test);
