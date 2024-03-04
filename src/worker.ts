@@ -41,6 +41,8 @@ const grow = (growLength: number) => {
 // Function that is used to move the gap left and right in the array
 const moveGap = (direction: string) => {
   if (direction === "left") {
+    if (gap_left === 0) return;
+
     gap_left--;
     gap_right--;
     buffer[gap_right + 1] = buffer[gap_left];
@@ -53,18 +55,72 @@ const moveGap = (direction: string) => {
     buffer[gap_left - 1] = buffer[gap_right];
     buffer[gap_right] = undefined;
   } else if (direction === "up") {
-    if (gap_left < canvasSize) return;
+    if (aLines.length === 1 && gap_left < canvasSize) return;
+    let move;
 
-    gap_left -= canvasSize;
-    gap_right -= canvasSize;
-    buffer.splice(
-      gap_right + 1,
-      0,
-      buffer.slice(gap_left, gap_left + canvasSize)
-    );
-    // buffer.splice();
+    const lastALine = aLines[aLines.length - 1];
+    const secondLastALine = aLines[aLines.length - 2];
+    const lengthOfSecondLastMinusLast =
+      secondLastALine.length - lastALine.length;
+
+    // Check if gap is in a new line
+    if (secondLastALine.length < canvasSize) {
+      console.log("true");
+
+      // If last line is longer than current line
+      if (lengthOfSecondLastMinusLast > 0) {
+        console.log("true again");
+
+        gap_left -= lastALine.length + 1 + lengthOfSecondLastMinusLast;
+        gap_right -= lastALine.length + 1 + lengthOfSecondLastMinusLast;
+
+        move = buffer.slice(
+          gap_left,
+          gap_left + lastALine.length + 1 + lengthOfSecondLastMinusLast
+        );
+        console.log(move);
+
+        buffer.splice(
+          gap_left,
+          lastALine.length + 1 + lengthOfSecondLastMinusLast
+        );
+        buffer.splice(gap_right + 1, 0, ...move);
+      }
+
+      // If last line is shorter than current line
+      if (lengthOfSecondLastMinusLast <= 0) {
+        gap_left -= lastALine.length + 1;
+        gap_right -= lastALine.length + 1;
+
+        move = buffer.slice(gap_left, gap_left + lastALine.length + 1);
+        console.log(move);
+
+        buffer.splice(gap_left, lastALine.length + 1);
+        buffer.splice(gap_right + 1, 0, ...move);
+      }
+    } else {
+      console.log("false");
+
+      gap_left -= canvasSize;
+      gap_right -= canvasSize;
+
+      move = buffer.slice(gap_left, gap_left + canvasSize);
+      console.log(move);
+
+      buffer.splice(gap_left, canvasSize);
+      buffer.splice(gap_right + 1, 0, ...move);
+    }
   } else if (direction === "down") {
-    if (bLines[bLines.length - 1].length === 0) return;
+    if (gap_right - 1 === gap_size || bLines[bLines.length - 1].length === 0)
+      return;
+
+    const move = buffer.slice(gap_right + 1, gap_right + 1 + canvasSize);
+
+    buffer.splice(gap_right + 1, canvasSize);
+    buffer.splice(gap_left, 0, ...move);
+
+    gap_left += canvasSize;
+    gap_right += canvasSize;
   }
 };
 
@@ -175,7 +231,10 @@ const display = () => {
 
   // Render value after cursor
 
-  if (bBuffer.length === 0) return;
+  if (bBuffer.length === 0) {
+    bLines = [];
+    return;
+  }
 
   // Account for first B line's length according to last A line
 
@@ -251,6 +310,7 @@ onmessage = (e) => {
       case "Delete":
       case "End":
       case "Home":
+      case "Escape":
       case "PageUp":
       case "PageDown":
         break;
@@ -276,60 +336,30 @@ onmessage = (e) => {
         insert(eventKey);
     }
 
-    console.log(eventKey);
+    // console.log(eventKey);
   }
   display();
-  // console.log(buffer, gap_left, gap_right, gap_size);
+  console.log(buffer, gap_left, gap_right, gap_size);
+  console.log("aLines: ", aLines);
+  console.log("bLines: ", bLines);
 };
 
-let test: Array<string | undefined> = [
-  "d",
-  "s",
-  "f",
-  "d",
-  "f",
-  "h",
-  "k",
-  "s",
-  "j",
-  "h",
-  "f",
-  "k",
-  "s",
-  "j",
-  "f",
-  "h",
-  "f",
-  "d",
-  "f",
-  "j",
-  "l",
-  "s",
-  "a",
-  "k",
-  "f",
-  "d",
-  "l",
-  "s",
-  "k",
-  "j",
-  "f",
-  "l",
-  "d",
-  "k",
-  "s",
-  "a",
-  "j",
-  undefined,
-  undefined,
-  undefined,
-];
-console.log("test: ", test);
+// let test: Array<string | undefined> = [
+//   "d",
+//   "s",
+//   undefined,
+//   undefined,
+//   undefined,
+//   "f",
+//   "s",
+//   "a",
+//   "j",
+// ];
+// console.log("test: ", test);
 
-let move = test.slice(7, 7 + 30);
-console.log("move: ", move);
+// let move = test.slice(2, 6);
+// console.log("move: ", move);
 
-test.splice(9 + 1, 0, ...move);
-test.splice(7, 30);
-
-// console.log(test);
+// test.splice(2, 4);
+// test.splice(5, 0, ...move);
+// console.log(test, move);
