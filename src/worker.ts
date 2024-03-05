@@ -12,7 +12,7 @@ let bLines: Array<string>;
 
 let ctx: CanvasRenderingContext2D;
 let canvas: HTMLCanvasElement;
-let canvasSize = 30;
+let canvasSize = 10;
 let canvasPadding = 1;
 let fontSize = 24;
 let fontWidth = fontSize / (10 / 6);
@@ -40,135 +40,142 @@ const grow = (growLength: number) => {
 
 // Function that is used to move the gap left and right in the array
 const moveGap = (direction: string) => {
-  // --- LEFT --- //
-  if (direction === "left") {
-    if (gap_left === 0) return;
+  let move;
+  const lastALine = aLines[aLines.length - 1];
 
-    gap_left--;
-    gap_right--;
-    buffer[gap_right + 1] = buffer[gap_left];
-    buffer[gap_left] = undefined;
+  switch (direction) {
+    // --- LEFT --- //
+    case "left":
+      if (gap_left === 0) return;
 
+      gap_left--;
+      gap_right--;
+      buffer[gap_right + 1] = buffer[gap_left];
+      buffer[gap_left] = undefined;
+
+      break;
     // --- RIGHT --- //
-  } else if (direction === "right") {
-    if (gap_right === gap_size) return;
+    case "right":
+      if (gap_right === gap_size) return;
 
-    gap_left++;
-    gap_right++;
-    buffer[gap_left - 1] = buffer[gap_right];
-    buffer[gap_right] = undefined;
+      gap_left++;
+      gap_right++;
+      buffer[gap_left - 1] = buffer[gap_right];
+      buffer[gap_right] = undefined;
+
+      break;
 
     // --- UP --- //
-  } else if (direction === "up") {
-    if (aLines.length === 1 && gap_left < canvasSize) return;
-    let move;
+    case "up":
+      if (
+        aBuffer.length === 0 ||
+        (aLines.length === 1 && gap_left < canvasSize)
+      )
+        return;
 
-    const lastALine = aLines[aLines.length - 1];
-    const secondLastALine = aLines[aLines.length - 2];
-    const lengthOfSecondLastMinusLast =
-      secondLastALine.length - lastALine.length;
+      const secondLastALine = aLines[aLines.length - 2];
+      const lengthOfSecondLastMinusLast =
+        secondLastALine.length - lastALine.length;
 
-    // Check if gap is in a new line
-    if (secondLastALine.length < canvasSize) {
-      // If last line is longer than current line
-      if (lengthOfSecondLastMinusLast > 0) {
-        gap_left -= lastALine.length + 1 + lengthOfSecondLastMinusLast;
-        gap_right -= lastALine.length + 1 + lengthOfSecondLastMinusLast;
+      // Check if gap is in a new line
+      if (secondLastALine.length < canvasSize) {
+        // If last line is longer than current line
+        if (lengthOfSecondLastMinusLast > 0) {
+          gap_left -= lastALine.length + 1 + lengthOfSecondLastMinusLast;
+          gap_right -= lastALine.length + 1 + lengthOfSecondLastMinusLast;
 
-        move = buffer.slice(
-          gap_left,
-          gap_left + lastALine.length + 1 + lengthOfSecondLastMinusLast
-        );
+          move = buffer.slice(
+            gap_left,
+            gap_left + lastALine.length + 1 + lengthOfSecondLastMinusLast
+          );
+
+          buffer.splice(
+            gap_left,
+            lastALine.length + 1 + lengthOfSecondLastMinusLast
+          );
+          buffer.splice(gap_right + 1, 0, ...move);
+        }
+
+        // If last line is shorter than current line
+        else {
+          gap_left -= lastALine.length + 1;
+          gap_right -= lastALine.length + 1;
+
+          move = buffer.slice(gap_left, gap_left + lastALine.length + 1);
+          console.log(move);
+
+          buffer.splice(gap_left, lastALine.length + 1);
+          buffer.splice(gap_right + 1, 0, ...move);
+        }
+      } else {
+        gap_left -= canvasSize;
+        gap_right -= canvasSize;
+
+        move = buffer.slice(gap_left, gap_left + canvasSize);
         console.log(move);
 
-        buffer.splice(
-          gap_left,
-          lastALine.length + 1 + lengthOfSecondLastMinusLast
-        );
+        buffer.splice(gap_left, canvasSize);
         buffer.splice(gap_right + 1, 0, ...move);
       }
 
-      // If last line is shorter than current line
-      else {
-        gap_left -= lastALine.length + 1;
-        gap_right -= lastALine.length + 1;
-
-        move = buffer.slice(gap_left, gap_left + lastALine.length + 1);
-        console.log(move);
-
-        buffer.splice(gap_left, lastALine.length + 1);
-        buffer.splice(gap_right + 1, 0, ...move);
-      }
-    } else {
-      gap_left -= canvasSize;
-      gap_right -= canvasSize;
-
-      move = buffer.slice(gap_left, gap_left + canvasSize);
-      console.log(move);
-
-      buffer.splice(gap_left, canvasSize);
-      buffer.splice(gap_right + 1, 0, ...move);
-    }
+      break;
 
     // --- DOWN --- //
-  } else if (direction === "down") {
-    if (gap_right - 1 === gap_size || bLines.length < 2) return;
+    case "down":
+      if (gap_right - 1 === gap_size || bLines.length < 2) return;
 
-    let move;
-    const lastALine = aLines[aLines.length - 1];
-    const firstBLine = bLines[0];
-    const secondBLine = bLines[1];
-    const firstBLineContainsNull = bBuffer
-      .slice(0, canvasSize - lastALine.length)
-      .includes(null);
-    console.log(firstBLineContainsNull);
+      const firstBLine = bLines[0];
+      const secondBLine = bLines[1];
+      const firstBLineContainsNull = bBuffer
+        .slice(0, canvasSize - lastALine.length)
+        .includes(null);
 
-    // Check if next line is a new line or continuous of current line
-    if (firstBLineContainsNull) {
-      console.log("true");
+      // Check if next line is a new line or continuous of current line
+      if (firstBLineContainsNull) {
+        // If next line length is longer than current cursor position
+        if (secondBLine.length > lastALine.length) {
+          move = buffer.slice(
+            gap_right + 1,
+            gap_right + 1 + firstBLine.length + 1 + lastALine.length
+          );
 
-      // If next line length is longer than current cursor position
-      if (secondBLine.length > lastALine.length) {
-        console.log("true again");
-        move = buffer.slice(
-          gap_right + 1,
-          gap_right + 1 + firstBLine.length + 1 + lastALine.length
-        );
+          buffer.splice(
+            gap_right + 1,
+            firstBLine.length + 1 + lastALine.length
+          );
+          buffer.splice(gap_left, 0, ...move);
 
-        buffer.splice(gap_right + 1, firstBLine.length + 1 + lastALine.length);
+          gap_left += firstBLine.length + 1 + lastALine.length;
+          gap_right += firstBLine.length + 1 + lastALine.length;
+        }
+
+        // If next line length is shorter than current cursor position
+        else {
+          move = buffer.slice(
+            gap_right + 1,
+            gap_right + 1 + firstBLine.length + 1 + secondBLine.length
+          );
+
+          buffer.splice(
+            gap_right + 1,
+            firstBLine.length + 1 + secondBLine.length
+          );
+          buffer.splice(gap_left, 0, ...move);
+
+          gap_left += firstBLine.length + 1 + secondBLine.length;
+          gap_right += firstBLine.length + 1 + secondBLine.length;
+        }
+      } else {
+        move = buffer.slice(gap_right + 1, gap_right + 1 + canvasSize);
+
+        buffer.splice(gap_right + 1, canvasSize);
         buffer.splice(gap_left, 0, ...move);
 
-        gap_left += firstBLine.length + 1 + lastALine.length;
-        gap_right += firstBLine.length + 1 + lastALine.length;
+        gap_left += canvasSize;
+        gap_right += canvasSize;
       }
 
-      // If next line length is shorter than current cursor position
-      else {
-        console.log("false again");
-        move = buffer.slice(
-          gap_right + 1,
-          gap_right + 1 + firstBLine.length + 1 + secondBLine.length
-        );
-
-        buffer.splice(
-          gap_right + 1,
-          firstBLine.length + 1 + secondBLine.length
-        );
-        buffer.splice(gap_left, 0, ...move);
-
-        gap_left += firstBLine.length + 1 + secondBLine.length;
-        gap_right += firstBLine.length + 1 + secondBLine.length;
-      }
-    } else {
-      console.log("false");
-      move = buffer.slice(gap_right + 1, gap_right + 1 + canvasSize);
-
-      buffer.splice(gap_right + 1, canvasSize);
-      buffer.splice(gap_left, 0, ...move);
-
-      gap_left += canvasSize;
-      gap_right += canvasSize;
-    }
+      break;
   }
 };
 
@@ -247,7 +254,7 @@ const handleLineBreak = (arr: Array<string | null | undefined>) => {
 
 const display = () => {
   // Clear canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.width);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Define content divided by cursor
   aBuffer = buffer.slice(0, gap_left);
@@ -308,14 +315,6 @@ const display = () => {
 
   // Modify first b line to only fit rest of canavas size after last a line
 
-  // console.log("aLines: ", aLines);
-  // console.log("aLines length: ", aLines.length);
-  // console.log("Last aLine: ", lastALine);
-  // console.log("bLines: ", bLines);
-  // console.log("bLines length: ", bLines.length);
-  // console.log("cursorPositionX: ", cursorPositionX);
-  // console.log("cursorPositionY: ", cursorPositionY);
-
   let yPositionOfB = cursorPositionY;
 
   for (let i = 0; i < bLines.length; i++) {
@@ -328,6 +327,27 @@ const display = () => {
   }
 };
 
+const maxCanvasSize = () => {
+  let lastLine;
+
+  if (bBuffer.length === 0) {
+    lastLine = aLines[aLines.length - 1];
+  } else {
+    lastLine = bLines[bLines.length - 1];
+  }
+
+  if (lastLine !== undefined) {
+    if (
+      aLines.length + bLines.length === canvasSize / 2 + 1 &&
+      lastLine.length === 0
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 // Worker messages
 onmessage = (e) => {
   if (e.data[0] === "setUpCanvas") {
@@ -337,7 +357,7 @@ onmessage = (e) => {
 
     // canvas size
     canvas.width = fontWidth * canvasSize + canvasPadding * 2;
-    canvas.height = fontWidth * canvasSize + canvasPadding * 2;
+    canvas.height = (fontSize * canvasSize + canvasPadding * 2) / 2;
 
     // font style
     ctx.font = fontSize + "px " + fontFamily;
@@ -381,34 +401,15 @@ onmessage = (e) => {
         insert(null);
         break;
       default:
-        insert(eventKey);
+        if (maxCanvasSize()) {
+          postMessage("alert");
+        } else {
+          insert(eventKey);
+        }
     }
 
     // console.log(eventKey);
   }
   display();
-  console.log(buffer, gap_left, gap_right, gap_size);
-  console.log("bBuffer: ", bBuffer);
-  console.log("aLines: ", aLines);
-  console.log("bLines: ", bLines);
+  // console.log(buffer, gap_left, gap_right, gap_size);
 };
-
-// let test: Array<string | undefined> = [
-//   "d",
-//   "s",
-//   undefined,
-//   undefined,
-//   undefined,
-//   "f",
-//   "s",
-//   "a",
-//   "j",
-// ];
-// console.log("test: ", test);
-
-// let move = test.slice(2, 6);
-// console.log("move: ", move);
-
-// test.splice(2, 4);
-// test.splice(5, 0, ...move);
-// console.log(test, move);
