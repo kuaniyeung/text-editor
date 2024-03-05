@@ -40,6 +40,7 @@ const grow = (growLength: number) => {
 
 // Function that is used to move the gap left and right in the array
 const moveGap = (direction: string) => {
+  // --- LEFT --- //
   if (direction === "left") {
     if (gap_left === 0) return;
 
@@ -47,6 +48,8 @@ const moveGap = (direction: string) => {
     gap_right--;
     buffer[gap_right + 1] = buffer[gap_left];
     buffer[gap_left] = undefined;
+
+    // --- RIGHT --- //
   } else if (direction === "right") {
     if (gap_right === gap_size) return;
 
@@ -54,6 +57,8 @@ const moveGap = (direction: string) => {
     gap_right++;
     buffer[gap_left - 1] = buffer[gap_right];
     buffer[gap_right] = undefined;
+
+    // --- UP --- //
   } else if (direction === "up") {
     if (aLines.length === 1 && gap_left < canvasSize) return;
     let move;
@@ -65,12 +70,8 @@ const moveGap = (direction: string) => {
 
     // Check if gap is in a new line
     if (secondLastALine.length < canvasSize) {
-      console.log("true");
-
       // If last line is longer than current line
       if (lengthOfSecondLastMinusLast > 0) {
-        console.log("true again");
-
         gap_left -= lastALine.length + 1 + lengthOfSecondLastMinusLast;
         gap_right -= lastALine.length + 1 + lengthOfSecondLastMinusLast;
 
@@ -88,7 +89,7 @@ const moveGap = (direction: string) => {
       }
 
       // If last line is shorter than current line
-      if (lengthOfSecondLastMinusLast <= 0) {
+      else {
         gap_left -= lastALine.length + 1;
         gap_right -= lastALine.length + 1;
 
@@ -99,8 +100,6 @@ const moveGap = (direction: string) => {
         buffer.splice(gap_right + 1, 0, ...move);
       }
     } else {
-      console.log("false");
-
       gap_left -= canvasSize;
       gap_right -= canvasSize;
 
@@ -110,17 +109,66 @@ const moveGap = (direction: string) => {
       buffer.splice(gap_left, canvasSize);
       buffer.splice(gap_right + 1, 0, ...move);
     }
+
+    // --- DOWN --- //
   } else if (direction === "down") {
-    if (gap_right - 1 === gap_size || bLines[bLines.length - 1].length === 0)
-      return;
+    if (gap_right - 1 === gap_size || bLines.length < 2) return;
 
-    const move = buffer.slice(gap_right + 1, gap_right + 1 + canvasSize);
+    let move;
+    const lastALine = aLines[aLines.length - 1];
+    const firstBLine = bLines[0];
+    const secondBLine = bLines[1];
+    const firstBLineContainsNull = bBuffer
+      .slice(0, canvasSize - lastALine.length)
+      .includes(null);
+    console.log(firstBLineContainsNull);
 
-    buffer.splice(gap_right + 1, canvasSize);
-    buffer.splice(gap_left, 0, ...move);
+    // Check if next line is a new line or continuous of current line
+    if (firstBLineContainsNull) {
+      console.log("true");
 
-    gap_left += canvasSize;
-    gap_right += canvasSize;
+      // If next line length is longer than current cursor position
+      if (secondBLine.length > lastALine.length) {
+        console.log("true again");
+        move = buffer.slice(
+          gap_right + 1,
+          gap_right + 1 + firstBLine.length + 1 + lastALine.length
+        );
+
+        buffer.splice(gap_right + 1, firstBLine.length + 1 + lastALine.length);
+        buffer.splice(gap_left, 0, ...move);
+
+        gap_left += firstBLine.length + 1 + lastALine.length;
+        gap_right += firstBLine.length + 1 + lastALine.length;
+      }
+
+      // If next line length is shorter than current cursor position
+      else {
+        console.log("false again");
+        move = buffer.slice(
+          gap_right + 1,
+          gap_right + 1 + firstBLine.length + 1 + secondBLine.length
+        );
+
+        buffer.splice(
+          gap_right + 1,
+          firstBLine.length + 1 + secondBLine.length
+        );
+        buffer.splice(gap_left, 0, ...move);
+
+        gap_left += firstBLine.length + 1 + secondBLine.length;
+        gap_right += firstBLine.length + 1 + secondBLine.length;
+      }
+    } else {
+      console.log("false");
+      move = buffer.slice(gap_right + 1, gap_right + 1 + canvasSize);
+
+      buffer.splice(gap_right + 1, canvasSize);
+      buffer.splice(gap_left, 0, ...move);
+
+      gap_left += canvasSize;
+      gap_right += canvasSize;
+    }
   }
 };
 
@@ -340,6 +388,7 @@ onmessage = (e) => {
   }
   display();
   console.log(buffer, gap_left, gap_right, gap_size);
+  console.log("bBuffer: ", bBuffer);
   console.log("aLines: ", aLines);
   console.log("bLines: ", bLines);
 };
