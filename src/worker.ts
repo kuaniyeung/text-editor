@@ -12,11 +12,12 @@ let bLines: Array<string>;
 
 let ctx: CanvasRenderingContext2D;
 let canvas: HTMLCanvasElement;
-let canvasSize = 10;
+let canvasSize = 40;
 let canvasPadding = 1;
 let fontSize = 24;
 let fontWidth = fontSize / (10 / 6);
 let fontFamily = "monospace";
+let canvasColor = "teal";
 let cursorPositionX: number;
 let cursorPositionY: number;
 let eventKey;
@@ -252,6 +253,21 @@ const handleLineBreak = (arr: Array<string | null | undefined>) => {
   return result;
 };
 
+const setUpCanvas = (
+  canvasSize: number,
+  fontSize: number,
+  canvasColor: string
+) => {
+  // canvas size
+  canvas.width = fontWidth * canvasSize + canvasPadding * 2;
+  canvas.height = (fontSize * canvasSize + canvasPadding * 2) / 2;
+
+  // font style
+  ctx.font = fontSize + "px " + fontFamily;
+  ctx.textBaseline = "top";
+  ctx.fillStyle = canvasColor;
+};
+
 const display = () => {
   // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -259,13 +275,9 @@ const display = () => {
   // Define content divided by cursor
   aBuffer = buffer.slice(0, gap_left);
   bBuffer = buffer.slice(gap_right + 1);
-  const lineHeight = fontSize;
-
-  // console.log("aBuffer: ", aBuffer);
-  // console.log("bBuffer: ", bBuffer);
+  const lineHeight: number = fontSize;
 
   // Render value before cursor
-
   aLines = handleLineBreak(aBuffer);
   const lastALine = aLines[aLines.length - 1];
   let yPositionOfA = canvasPadding;
@@ -355,13 +367,7 @@ onmessage = (e) => {
     canvas = e.data[1];
     ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-    // canvas size
-    canvas.width = fontWidth * canvasSize + canvasPadding * 2;
-    canvas.height = (fontSize * canvasSize + canvasPadding * 2) / 2;
-
-    // font style
-    ctx.font = fontSize + "px " + fontFamily;
-    ctx.textBaseline = "top";
+    setUpCanvas(canvasSize, fontSize, canvasColor);
   }
 
   if (e.data[0] === "keydown") {
@@ -410,6 +416,16 @@ onmessage = (e) => {
 
     // console.log(eventKey);
   }
+
+  if (e.data[0] === "submit") {
+    canvasSize = e.data[1];
+    fontSize = e.data[2];
+    canvasColor = e.data[3];
+    setUpCanvas(canvasSize, fontSize, canvasColor);
+    fontWidth = fontSize / (10 / 6);
+  }
   display();
   // console.log(buffer, gap_left, gap_right, gap_size);
+  // console.log("aLines", aLines);
+  // console.log("bLines", bLines);
 };

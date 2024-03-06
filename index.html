@@ -7,6 +7,51 @@
     <title>Text Editor</title>
   </head>
   <body>
+    <h1>Simple Text Editor with Canvas API</h1>
+    <form>
+      <div class="row">
+        <label for="canvas-size"
+          >Canvas Size <i class="icon">&#8505;</i> :
+          <div class="info">Number of character per row</div></label
+        >
+        <input
+          type="number"
+          name="canvas-size"
+          id="canvas-size"
+          class="input"
+          min="2"
+          step="2"
+          value="40"
+          required
+        />
+      </div>
+      <div class="row">
+        <label for="font-size">Font Size: </label>
+        <input
+          type="number"
+          name="font-size"
+          id="font-size"
+          class="input"
+          value="24"
+          required
+        />
+      </div>
+      <div class="row">
+        <label for="color">Canvas Color: </label>
+        <input
+          type="color"
+          name="color"
+          class="input"
+          id="color"
+          value="#008080"
+          required
+        />
+      </div>
+      <div>
+        <button type="submit" value="Enter" id="submit">Enter</button>
+      </div>
+    </form>
+    <div id="canvas-box"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
