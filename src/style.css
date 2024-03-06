@@ -19,13 +19,14 @@ body {
 
 h1 {
   font-weight: 200;
-  padding: 50px;
+  padding: 30px;
 }
 
 form {
   font-weight: 100;
   width: 80vw;
   margin: 0 auto;
+  padding: 20px 0 20px 0;
 }
 
 .row {
@@ -74,7 +75,7 @@ form {
 #canvas-box {
   align-items: center;
   display: flex;
-  height: 100vh;
+  height: 100%;
   justify-content: center;
 }
 
