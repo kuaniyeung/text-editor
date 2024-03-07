@@ -2,7 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="stylesheet" type="text/css" href="src/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400..700&family=Pixelify+Sans:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Text Editor</title>
   </head>
@@ -11,7 +17,7 @@
     <form>
       <div class="row">
         <label for="canvas-size"
-          >Canvas Size <i class="icon">&#8505;</i> :
+          >Canvas Size <span class="icon">(&#8505;)</span>:
           <div class="info">Number of character per row</div></label
         >
         <input
@@ -43,7 +49,7 @@
           name="color"
           class="input"
           id="color"
-          value="#008080"
+          value="#18d9f7"
           required
         />
       </div>

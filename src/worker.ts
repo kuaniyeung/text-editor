@@ -17,7 +17,7 @@ let canvasPadding = 1;
 let fontSize = 24;
 let fontWidth = fontSize / (10 / 6);
 let fontFamily = "monospace";
-let canvasColor = "teal";
+let canvasColor = "#18d9f7";
 let cursorPositionX: number;
 let cursorPositionY: number;
 let eventKey;

@@ -1,4 +1,3 @@
-import "./style.css";
 import Worker from "./worker?worker";
 
 // Set up worker and canvas
@@ -36,7 +35,17 @@ form?.addEventListener("submit", (e) => {
     const fontSize = parseInt(fontSizeInput.value);
     const canvasColor = canvasColorInput.value;
     worker.postMessage(["submit", canvasSize, fontSize, canvasColor]);
-    if (canvasStyle && submitButton) {
+    if (
+      canvasSizeInput &&
+      fontSizeInput &&
+      canvasColorInput &&
+      canvasStyle &&
+      submitButton
+    ) {
+      document.body.style.color = canvasColor;
+      canvasSizeInput.style.borderColor = canvasColor;
+      fontSizeInput.style.borderColor = canvasColor;
+      canvasColorInput.style.borderColor = canvasColor;
       canvasStyle.style.borderColor = canvasColor;
       submitButton.style.borderColor = canvasColor;
       submitButton.style.backgroundColor = canvasColor;
