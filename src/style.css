@@ -22,6 +22,9 @@ body {
   background-color: black;
   color: hsl(188, 93%, 53%);
   font-family: "Kode Mono", monospace;
+}
+
+#app {
   text-align: center;
 }
 
@@ -29,6 +32,24 @@ h1 {
   font-weight: 500;
   font-size: x-large;
   padding: 30px;
+}
+
+#instruction {
+  font-size: medium;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+#ordered-list {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  margin: 10px;
+}
+
+li {
+  text-align: left;
 }
 
 form {

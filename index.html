@@ -13,51 +13,74 @@
     <title>Text Editor</title>
   </head>
   <body>
-    <h1>Text Editor with Canvas & Web Workers API</h1>
-    <form>
-      <div class="row">
-        <label for="canvas-size"
-          >Canvas Size <span class="icon">(&#8505;)</span>:
-          <div class="info">Number of character per row</div></label
-        >
-        <input
-          type="number"
-          name="canvas-size"
-          id="canvas-size"
-          class="input"
-          min="2"
-          step="2"
-          value="40"
-          required
-        />
+    <div id="app">
+      <h1>Text Editor with Canvas & Web Workers API</h1>
+      <span id="instruction"
+        >Welcome to our canvas text editor, powered by the worker API!
+        <br />Here's a quick rundown on how it functions:</span
+      >
+      <div id="ordered-list">
+        <ol>
+          <li>
+            Simply start typing to engage with the canvas and begin your text
+            editing journey.
+          </li>
+          <li>
+            If you want to move around the canvas, use your trusty arrow keys to
+            navigate.
+          </li>
+          <li>
+            This editor loves big screens - it works with computer keyboards,
+            and computer keyboards only!
+          </li>
+        </ol>
       </div>
-      <div class="row">
-        <label for="font-size">Font Size: </label>
-        <input
-          type="number"
-          name="font-size"
-          id="font-size"
-          class="input"
-          value="24"
-          required
-        />
-      </div>
-      <div class="row">
-        <label for="color">Canvas Color: </label>
-        <input
-          type="color"
-          name="color"
-          class="input"
-          id="color"
-          value="#18d9f7"
-          required
-        />
-      </div>
-      <div>
-        <button type="submit" value="Enter" id="submit">Enter</button>
-      </div>
-    </form>
-    <div id="canvas-box"></div>
+
+      <form>
+        <div class="row">
+          <label for="canvas-size"
+            >Canvas Size <span class="icon">(&#8505;)</span>:
+            <div class="info">Number of character per row</div></label
+          >
+          <input
+            type="number"
+            name="canvas-size"
+            id="canvas-size"
+            class="input"
+            min="2"
+            step="2"
+            value="40"
+            required
+          />
+        </div>
+        <div class="row">
+          <label for="font-size">Font Size: </label>
+          <input
+            type="number"
+            name="font-size"
+            id="font-size"
+            class="input"
+            value="24"
+            required
+          />
+        </div>
+        <div class="row">
+          <label for="color">Canvas Color: </label>
+          <input
+            type="color"
+            name="color"
+            class="input"
+            id="color"
+            value="#18d9f7"
+            required
+          />
+        </div>
+        <div>
+          <button type="submit" value="Enter" id="submit">Enter</button>
+        </div>
+      </form>
+      <div id="canvas-box"></div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

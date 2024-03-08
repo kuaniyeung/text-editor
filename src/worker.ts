@@ -294,7 +294,7 @@ const display = () => {
   }
   cursorPositionY = (aLines.length - 1) * 24;
 
-  ctx.fillRect(cursorPositionX, cursorPositionY, 1, 24);
+  ctx.fillRect(cursorPositionX, cursorPositionY, 1, fontSize);
 
   // Render value after cursor
 
@@ -413,19 +413,14 @@ onmessage = (e) => {
           insert(eventKey);
         }
     }
-
-    // console.log(eventKey);
   }
 
   if (e.data[0] === "submit") {
     canvasSize = e.data[1];
     fontSize = e.data[2];
     canvasColor = e.data[3];
-    setUpCanvas(canvasSize, fontSize, canvasColor);
     fontWidth = fontSize / (10 / 6);
+    setUpCanvas(canvasSize, fontSize, canvasColor);
   }
   display();
-  // console.log(buffer, gap_left, gap_right, gap_size);
-  // console.log("aLines", aLines);
-  // console.log("bLines", bLines);
 };
