@@ -1,3 +1,4 @@
+import { maxHeaderSize } from "http";
 import Worker from "./worker?worker";
 
 // Declare worker and canvas
@@ -11,84 +12,84 @@ const context = canvas.transferControlToOffscreen();
 
 // Declare form
 const form = document.querySelector("form");
-const canvasSizeInput = document.getElementById(
-  "canvas-size"
+const canvasWidthInput = document.getElementById(
+  "canvas-width"
+) as HTMLInputElement;
+const canvasHeightInput = document.getElementById(
+  "canvas-height"
 ) as HTMLInputElement;
 const fontSizeInput = document.getElementById("font-size") as HTMLInputElement;
 const canvasColorInput = document.getElementById("color") as HTMLInputElement;
 const submitButton = document.getElementById("submit") as HTMLButtonElement;
-const icon = document.querySelector(".icon") as HTMLBodyElement;
-const info = document.querySelector(".info") as HTMLBodyElement;
 let fontWidth: number;
+const inputs = document.querySelectorAll("input");
+let isAnyInputFocused = false;
 let windowWidth: number;
-let maxCanvasSize: number;
-let maxFontSize: number;
-
-// Set up worker and canvas
-worker.postMessage(["setUpCanvas", context], [context]);
-worker.onmessage = (e) => {
-  if (e.data === "alert") {
-    alert("Maximum character reached. Increase canvas size.");
-  }
-};
-addEventListener("keydown", (e) => worker.postMessage([e.type, e.key]));
+let windowHeight: number;
+let maxCanvasWidth: number;
+let maxCanvasHeight: number;
 
 // Set up form
 form?.addEventListener("submit", (e) => {
   e.preventDefault(); // Prevent form submission
-  if (canvasSizeInput && fontSizeInput && canvasColorInput) {
-    const canvasSize = parseInt(canvasSizeInput.value);
+  if (
+    canvasWidthInput &&
+    canvasHeightInput &&
+    fontSizeInput &&
+    canvasColorInput
+  ) {
+    const canvasWidth = parseInt(canvasWidthInput.value);
+    const canvasHeight = parseInt(canvasHeightInput.value);
     const fontSize = parseInt(fontSizeInput.value);
     const canvasColor = canvasColorInput.value;
 
     if (
-      canvasSizeInput &&
+      canvasWidthInput &&
       fontSizeInput &&
       canvasColorInput &&
       canvasStyle &&
       submitButton
     ) {
       document.body.style.color = canvasColor;
-      canvasSizeInput.style.borderColor = canvasColor;
+      canvasWidthInput.style.borderColor = canvasColor;
+      canvasHeightInput.style.borderColor = canvasColor;
       fontSizeInput.style.borderColor = canvasColor;
       canvasColorInput.style.borderColor = canvasColor;
       canvasStyle.style.borderColor = canvasColor;
       submitButton.style.borderColor = canvasColor;
       submitButton.style.backgroundColor = canvasColor;
     }
-    console.log(123);
-    worker.postMessage(["submit", canvasSize, fontSize, canvasColor]);
+
+    worker.postMessage([
+      "submit",
+      canvasWidth,
+      canvasHeight,
+      fontSize,
+      canvasColor,
+    ]);
   }
-});
-
-icon.addEventListener("mouseenter", () => {
-  info.style.display = "block";
-});
-
-icon.addEventListener("mouseleave", () => {
-  info.style.display = "none";
 });
 
 const updateMaxSizes = () => {
   fontWidth = parseInt(fontSizeInput.value) / (10 / 6);
   windowWidth = window.innerWidth;
-  maxCanvasSize = Math.floor((windowWidth - 40) / fontWidth);
-  maxFontSize = Math.floor(
-    ((windowWidth - 40) / parseInt(canvasSizeInput.value)) * (10 / 6)
-  );
+  windowHeight = window.innerHeight;
+  maxCanvasWidth = Math.floor(windowWidth - 40);
+  maxCanvasHeight = Math.floor(windowHeight - 40);
 
   // Update max attributes of input fields
-  canvasSizeInput.setAttribute("max", maxCanvasSize.toString());
-  fontSizeInput.setAttribute("max", maxFontSize.toString());
+  canvasWidthInput.setAttribute("max", maxCanvasWidth.toString());
+  canvasHeightInput.setAttribute("max", maxCanvasHeight.toString());
+  fontSizeInput.setAttribute("max", maxCanvasHeight.toString());
 };
 
 const updateInputValues = () => {
-  const currentCanvasSize = canvasSizeInput.value;
+  const currentCanvasWidth = canvasWidthInput.value;
   const currentFontSize = fontSizeInput.value;
   const currentFontWidth = parseInt(fontSizeInput.value) / (10 / 6);
 
   // Update the input values
-  canvasSizeInput.value = currentCanvasSize;
+  canvasWidthInput.value = currentCanvasWidth;
   fontSizeInput.value = currentFontSize;
   fontWidth = currentFontWidth;
 
@@ -97,62 +98,24 @@ const updateInputValues = () => {
 
 updateInputValues();
 
-canvasSizeInput.addEventListener("input", updateInputValues);
+canvasWidthInput.addEventListener("input", updateInputValues);
+canvasHeightInput.addEventListener("input", updateInputValues);
 fontSizeInput.addEventListener("input", updateInputValues);
 
-// Limit maximum canvas and font size
-
-canvasSizeInput.addEventListener("input", () => {
-  const currentSize = parseInt(canvasSizeInput.value);
-
-  if (canvasSizeInput.value !== "") {
-    if (currentSize > maxCanvasSize) {
-      alert(
-        `Maximum canvas size ${maxCanvasSize} reached. Please choose a smaller number.`
-      );
-
-      canvasSizeInput.value = canvasSizeInput.value.slice(0, -1);
-    }
-  }
+inputs.forEach((e) => {
+  e.addEventListener("focusin", () => (isAnyInputFocused = true));
+  e.addEventListener("focusout", () => (isAnyInputFocused = false));
 });
+addEventListener("keydown", () => console.log(isAnyInputFocused));
 
-canvasSizeInput.addEventListener("change", () => {
-  const currentSize = parseInt(canvasSizeInput.value);
-
-  if (canvasSizeInput.value !== "") {
-    if (currentSize % 2 !== 0) {
-      alert("Please enter an even number for canvas size.");
-
-      canvasSizeInput.value = canvasSizeInput.value.slice(0, -1);
-    }
+// Set up worker and canvas
+worker.postMessage(["setUpCanvas", context], [context]);
+worker.onmessage = (e) => {
+  if (e.data === "alert") {
+    alert("Maximum character reached. Increase canvas size.");
   }
-});
+};
 
-fontSizeInput.addEventListener("input", () => {
-  const currentSize = parseInt(fontSizeInput.value);
-
-  if (fontSizeInput.value !== "") {
-    if (currentSize > maxFontSize) {
-      alert(
-        `Maximum font size ${maxFontSize} reached. Please choose a smaller number.`
-      );
-
-      fontSizeInput.value = fontSizeInput.value.slice(0, -1);
-    }
-  }
-});
-
-form?.addEventListener("submit", () => {
-  console.log(
-    "windowWidth: ",
-    windowWidth,
-    ", canvasSize value: ",
-    canvasSizeInput.value,
-    ", maxCanvasSize: ",
-    maxCanvasSize,
-    ", fontSize value: ",
-    fontSizeInput.value,
-    ", maxFontSize: ",
-    maxFontSize
-  );
+addEventListener("keydown", (e) => {
+  if (!isAnyInputFocused) worker.postMessage([e.type, e.key]);
 });

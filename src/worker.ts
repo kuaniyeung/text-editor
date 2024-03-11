@@ -5,17 +5,20 @@ let gap_size = 10;
 let gap_left = 0;
 let gap_right = gap_size - gap_left - 1;
 
-let aBuffer: Array<string | null | undefined>;
-let bBuffer: Array<string | null | undefined>;
-let aLines: Array<string>;
-let bLines: Array<string>;
+let aBuffer: Array<string | null | undefined> = [];
+let bBuffer: Array<string | null | undefined> = [];
+let aLines: Array<string> = [];
+let bLines: Array<string> = [];
+let lastALine;
 
 let ctx: CanvasRenderingContext2D;
 let canvas: HTMLCanvasElement;
-let canvasSize = 40;
+let canvasWidth = 600;
+let canvasHeight = 600;
 let canvasPadding = 1;
 let fontSize = 24;
 let fontWidth = fontSize / (10 / 6);
+let rowSize = Math.floor(canvasWidth / fontWidth);
 let fontFamily = "monospace";
 let canvasColor = "#18d9f7";
 let cursorPositionX: number;
@@ -42,7 +45,6 @@ const grow = (growLength: number) => {
 // Function that is used to move the gap left and right in the array
 const moveGap = (direction: string) => {
   let move;
-  const lastALine = aLines[aLines.length - 1];
 
   switch (direction) {
     // --- LEFT --- //
@@ -68,31 +70,30 @@ const moveGap = (direction: string) => {
 
     // --- UP --- //
     case "up":
-      if (
-        aBuffer.length === 0 ||
-        (aLines.length === 1 && gap_left < canvasSize)
-      )
+      // Check if you are at the first line
+      if (aBuffer.length === 0 || (aLines.length === 1 && gap_left < rowSize))
         return;
 
       const secondLastALine = aLines[aLines.length - 2];
-      const lengthOfSecondLastMinusLast =
+      const secondLastMinusLastLength =
         secondLastALine.length - lastALine.length;
 
       // Check if gap is in a new line
-      if (secondLastALine.length < canvasSize) {
+      if (secondLastALine.length < rowSize) {
         // If last line is longer than current line
-        if (lengthOfSecondLastMinusLast > 0) {
-          gap_left -= lastALine.length + 1 + lengthOfSecondLastMinusLast;
-          gap_right -= lastALine.length + 1 + lengthOfSecondLastMinusLast;
+        if (secondLastMinusLastLength > 0) {
+          gap_left -= lastALine.length + 1 + secondLastMinusLastLength;
+          gap_right -= lastALine.length + 1 + secondLastMinusLastLength;
 
           move = buffer.slice(
             gap_left,
-            gap_left + lastALine.length + 1 + lengthOfSecondLastMinusLast
+            gap_left + lastALine.length + 1 + secondLastMinusLastLength
           );
+          console.log("up move 1: ", move);
 
           buffer.splice(
             gap_left,
-            lastALine.length + 1 + lengthOfSecondLastMinusLast
+            lastALine.length + 1 + secondLastMinusLastLength
           );
           buffer.splice(gap_right + 1, 0, ...move);
         }
@@ -103,19 +104,19 @@ const moveGap = (direction: string) => {
           gap_right -= lastALine.length + 1;
 
           move = buffer.slice(gap_left, gap_left + lastALine.length + 1);
-          console.log(move);
+          console.log("up move 2: ", move);
 
           buffer.splice(gap_left, lastALine.length + 1);
           buffer.splice(gap_right + 1, 0, ...move);
         }
       } else {
-        gap_left -= canvasSize;
-        gap_right -= canvasSize;
+        gap_left -= rowSize;
+        gap_right -= rowSize;
 
-        move = buffer.slice(gap_left, gap_left + canvasSize);
-        console.log(move);
+        move = buffer.slice(gap_left, gap_left + rowSize);
+        console.log("up move 3: ", move);
 
-        buffer.splice(gap_left, canvasSize);
+        buffer.splice(gap_left, rowSize);
         buffer.splice(gap_right + 1, 0, ...move);
       }
 
@@ -123,15 +124,21 @@ const moveGap = (direction: string) => {
 
     // --- DOWN --- //
     case "down":
+      // Check if you are at the last line
       if (gap_right - 1 === gap_size || bLines.length < 2) return;
 
       const firstBLine = bLines[0];
       const secondBLine = bLines[1];
-      const firstBLineContainsNull = bBuffer
-        .slice(0, canvasSize - lastALine.length)
-        .includes(null);
+      let firstBLineContainsNull;
+      if (aBuffer.length > 0) {
+        firstBLineContainsNull = bBuffer
+          .slice(0, rowSize - lastALine.length)
+          .includes(null);
+      } else {
+        firstBLineContainsNull = bBuffer.slice(0, rowSize).includes(null);
+      }
 
-      // Check if next line is a new line or continuous of current line
+      // Check if next line is a new line
       if (firstBLineContainsNull) {
         // If next line length is longer than current cursor position
         if (secondBLine.length > lastALine.length) {
@@ -166,14 +173,27 @@ const moveGap = (direction: string) => {
           gap_left += firstBLine.length + 1 + secondBLine.length;
           gap_right += firstBLine.length + 1 + secondBLine.length;
         }
+
+        // If next line is continuous of current line
       } else {
-        move = buffer.slice(gap_right + 1, gap_right + 1 + canvasSize);
+        // Check if next line is shorter than current cursor position
+        if (firstBLine.length + secondBLine.length < rowSize) {
+          move = buffer.slice(gap_right + 1);
 
-        buffer.splice(gap_right + 1, canvasSize);
-        buffer.splice(gap_left, 0, ...move);
+          buffer.splice(gap_right + 1, rowSize);
+          buffer.splice(gap_left, 0, ...move);
 
-        gap_left += canvasSize;
-        gap_right += canvasSize;
+          gap_left += firstBLine.length + secondBLine.length;
+          gap_right += firstBLine.length + secondBLine.length;
+        } else {
+          move = buffer.slice(gap_right + 1, gap_right + 1 + rowSize);
+
+          buffer.splice(gap_right + 1, rowSize);
+          buffer.splice(gap_left, 0, ...move);
+
+          gap_left += rowSize;
+          gap_right += rowSize;
+        }
       }
 
       break;
@@ -194,6 +214,8 @@ const insert = (input: string | null) => {
 
 // Function to remove one character at cursor
 const remove = () => {
+  if (gap_left === 0) return;
+
   gap_left--;
   buffer[gap_left] = undefined;
 };
@@ -207,12 +229,12 @@ const handleLineBreak = (arr: Array<string | null | undefined>) => {
     if (arr[i] === null) {
       if (segment.length > 0) {
         // If segment does not exceed canavas size, join the segment into a string
-        if (segment.length <= canvasSize) {
+        if (segment.length <= rowSize) {
           result.push(segment.join(""));
         } else {
           // If segment longer than canvas size, handle line break for text wrapping by spliting the segment into multiple segments of maximum canvas size elements each
-          for (let j = 0; j < segment.length; j += canvasSize) {
-            result.push(segment.slice(j, j + canvasSize).join(""));
+          for (let j = 0; j < segment.length; j += rowSize) {
+            result.push(segment.slice(j, j + rowSize).join(""));
           }
         }
 
@@ -230,12 +252,12 @@ const handleLineBreak = (arr: Array<string | null | undefined>) => {
   // Add the last segment if it's not empty
   if (segment.length > 0) {
     // If last segment shorter than canvas size, join segment into string
-    if (segment.length <= canvasSize) {
+    if (segment.length <= rowSize) {
       result.push(segment.join(""));
     } else {
       // Split the last segment into multiple segments of maximum 30 elements each
-      for (let j = 0; j < segment.length; j += canvasSize) {
-        result.push(segment.slice(j, j + canvasSize).join(""));
+      for (let j = 0; j < segment.length; j += rowSize) {
+        result.push(segment.slice(j, j + rowSize).join(""));
       }
     }
   }
@@ -246,26 +268,11 @@ const handleLineBreak = (arr: Array<string | null | undefined>) => {
   }
 
   // If the last segment in the result is exactly 30 characters long, add an empty string
-  if (result.length > 0 && result[result.length - 1].length === canvasSize) {
+  if (result.length > 0 && result[result.length - 1].length === canvasWidth) {
     result.push("");
   }
 
   return result;
-};
-
-const setUpCanvas = (
-  canvasSize: number,
-  fontSize: number,
-  canvasColor: string
-) => {
-  // canvas size
-  canvas.width = fontWidth * canvasSize + canvasPadding * 2;
-  canvas.height = (fontSize * canvasSize + canvasPadding * 2) / 2;
-
-  // font style
-  ctx.font = fontSize + "px " + fontFamily;
-  ctx.textBaseline = "top";
-  ctx.fillStyle = canvasColor;
 };
 
 const display = () => {
@@ -279,8 +286,17 @@ const display = () => {
 
   // Render value before cursor
   aLines = handleLineBreak(aBuffer);
-  const lastALine = aLines[aLines.length - 1];
+  lastALine = aLines[aLines.length - 1];
   let yPositionOfA = canvasPadding;
+
+  // Check if aLines is empty
+  let lastALineLength: number;
+
+  if (!lastALine) {
+    lastALineLength = 0;
+  } else {
+    lastALineLength = lastALine.length;
+  }
 
   for (let i = 0; i < aLines.length; i++) {
     ctx.fillText(aLines[i], 0, yPositionOfA);
@@ -290,9 +306,12 @@ const display = () => {
   // Render cursor
 
   if (aLines.length > 0) {
-    cursorPositionX = aLines[aLines.length - 1].length * fontWidth;
+    cursorPositionX = lastALineLength * fontWidth;
+    cursorPositionY = (aLines.length - 1) * 24;
+  } else {
+    cursorPositionX = 0;
+    cursorPositionY = 0;
   }
-  cursorPositionY = (aLines.length - 1) * 24;
 
   ctx.fillRect(cursorPositionX, cursorPositionY, 1, fontSize);
 
@@ -308,18 +327,18 @@ const display = () => {
   // If first line is not a new line and is longer than the segment until next new line
   if (
     bBuffer.slice(0, bBuffer.indexOf(null)).length >
-      canvasSize - lastALine.length &&
+      rowSize - lastALineLength &&
     bBuffer[0] !== null
   ) {
     const firstBLine = bBuffer
       .map((e, i) => {
-        if (i < canvasSize - lastALine.length) {
+        if (i < rowSize - lastALineLength) {
           return e;
         }
       })
       .join("");
 
-    bLines = handleLineBreak(bBuffer.slice(canvasSize - lastALine.length));
+    bLines = handleLineBreak(bBuffer.slice(rowSize - lastALineLength));
     bLines.unshift(firstBLine);
   } else {
     bLines = handleLineBreak(bBuffer);
@@ -339,6 +358,22 @@ const display = () => {
   }
 };
 
+const setUpCanvas = (
+  canvasWidth: number,
+  canvasHeight: number,
+  fontSize: number,
+  canvasColor: string
+) => {
+  // canvas size
+  canvas.width = canvasWidth + canvasPadding * 2;
+  canvas.height = canvasHeight + canvasPadding * 2;
+
+  // font style
+  ctx.font = fontSize + "px " + fontFamily;
+  ctx.textBaseline = "top";
+  ctx.fillStyle = canvasColor;
+};
+
 const maxCanvasSize = () => {
   let lastLine;
 
@@ -350,7 +385,7 @@ const maxCanvasSize = () => {
 
   if (lastLine !== undefined) {
     if (
-      aLines.length + bLines.length === canvasSize / 2 + 1 &&
+      aLines.length + bLines.length === rowSize / 2 + 1 &&
       lastLine.length === 0
     ) {
       return true;
@@ -367,7 +402,7 @@ onmessage = (e) => {
     canvas = e.data[1];
     ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-    setUpCanvas(canvasSize, fontSize, canvasColor);
+    setUpCanvas(canvasWidth, canvasHeight, fontSize, canvasColor);
   }
 
   if (e.data[0] === "keydown") {
@@ -416,11 +451,15 @@ onmessage = (e) => {
   }
 
   if (e.data[0] === "submit") {
-    canvasSize = e.data[1];
-    fontSize = e.data[2];
-    canvasColor = e.data[3];
+    canvasWidth = e.data[1];
+    canvasHeight = e.data[2];
+    fontSize = e.data[3];
+    canvasColor = e.data[4];
     fontWidth = fontSize / (10 / 6);
-    setUpCanvas(canvasSize, fontSize, canvasColor);
+    rowSize = Math.floor(canvasWidth / fontWidth);
+    setUpCanvas(canvasWidth, canvasHeight, fontSize, canvasColor);
   }
   display();
+  // console.log(aLines, bLines);
+  // console.log(buffer, gap_left, gap_right, gap_size, rowSize);
 };

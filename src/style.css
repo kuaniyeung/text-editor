@@ -26,6 +26,7 @@ body {
 
 #app {
   text-align: center;
+  user-select: none;
 }
 
 h1 {
@@ -35,7 +36,6 @@ h1 {
 }
 
 #instruction {
-  font-size: medium;
   font-weight: 600;
   text-decoration: underline;
 }
@@ -45,11 +45,16 @@ h1 {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-  margin: 10px;
+  margin: 10px 100px;
+}
+
+#ordered-list li:first-child {
+  margin-top: 10px;
 }
 
 li {
   text-align: left;
+  margin-bottom: 10px;
 }
 
 form {
@@ -71,6 +76,18 @@ form {
   padding-right: 10px;
 }
 
+.row .canvas-inputs {
+  display: flex;
+}
+x .row .canvas-inputs input {
+  flex: 4;
+}
+
+.row .canvas-inputs span {
+  flex: 1;
+  margin: 3px 5px 0 5px;
+}
+
 .input {
   width: 100%;
   border-radius: 5px;
@@ -80,12 +97,6 @@ form {
   letter-spacing: 1px;
   font-weight: 100;
   font-family: "Kode Mono", monospace;
-}
-
-.info {
-  display: none;
-  font-style: italic;
-  font-size: small;
 }
 
 #submit {

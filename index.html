@@ -38,20 +38,30 @@
 
       <form>
         <div class="row">
-          <label for="canvas-size"
-            >Canvas Size <span class="icon">(&#8505;)</span>:
-            <div class="info">Number of character per row</div></label
-          >
-          <input
-            type="number"
-            name="canvas-size"
-            id="canvas-size"
-            class="input"
-            min="2"
-            step="2"
-            value="40"
-            required
-          />
+          <label for="canvas-size">Canvas Size (w &#10005; h): </label>
+          <div class="canvas-inputs">
+            <input
+              type="number"
+              name="canvas-width"
+              id="canvas-width"
+              class="input"
+              min="10"
+              step="10"
+              value="600"
+              required
+            />
+            <span>&#10005;</span>
+            <input
+              type="number"
+              name="canvas-height"
+              id="canvas-height"
+              class="input"
+              min="10"
+              step="10"
+              value="600"
+              required
+            />
+          </div>
         </div>
         <div class="row">
           <label for="font-size">Font Size: </label>
@@ -61,6 +71,7 @@
             id="font-size"
             class="input"
             value="24"
+            max="600"
             required
           />
         </div>
