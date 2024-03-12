@@ -1,4 +1,3 @@
-import { maxHeaderSize } from "http";
 import Worker from "./worker?worker";
 
 // Declare worker and canvas
