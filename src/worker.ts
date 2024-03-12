@@ -459,7 +459,6 @@ onmessage = (e) => {
     rowSize = Math.floor(canvasWidth / fontWidth);
     setUpCanvas(canvasWidth, canvasHeight, fontSize, canvasColor);
   }
+
   display();
-  // console.log(aLines, bLines);
-  // console.log(buffer, gap_left, gap_right, gap_size, rowSize);
 };

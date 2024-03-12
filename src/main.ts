@@ -103,6 +103,11 @@ inputs.forEach((e) => {
 });
 addEventListener("keydown", () => console.log(isAnyInputFocused));
 
+// Prevent spacebar from moving screen downward
+addEventListener("keydown", (e) => {
+  if (e.key === " ") e.preventDefault();
+});
+
 // Set up worker and canvas
 worker.postMessage(["setUpCanvas", context], [context]);
 worker.onmessage = (e) => {
