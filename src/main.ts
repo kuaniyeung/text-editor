@@ -20,7 +20,6 @@ const canvasHeightInput = document.getElementById(
 const fontSizeInput = document.getElementById("font-size") as HTMLInputElement;
 const canvasColorInput = document.getElementById("color") as HTMLInputElement;
 const submitButton = document.getElementById("submit") as HTMLButtonElement;
-let fontWidth: number;
 const inputs = document.querySelectorAll("input");
 let isAnyInputFocused = false;
 let windowWidth: number;
@@ -70,7 +69,6 @@ form?.addEventListener("submit", (e) => {
 });
 
 const updateMaxSizes = () => {
-  fontWidth = parseInt(fontSizeInput.value) / (10 / 6);
   windowWidth = window.innerWidth;
   windowHeight = window.innerHeight;
   maxCanvasWidth = Math.floor(windowWidth - 40);
@@ -85,12 +83,10 @@ const updateMaxSizes = () => {
 const updateInputValues = () => {
   const currentCanvasWidth = canvasWidthInput.value;
   const currentFontSize = fontSizeInput.value;
-  const currentFontWidth = parseInt(fontSizeInput.value) / (10 / 6);
 
   // Update the input values
   canvasWidthInput.value = currentCanvasWidth;
   fontSizeInput.value = currentFontSize;
-  fontWidth = currentFontWidth;
 
   updateMaxSizes();
 };
