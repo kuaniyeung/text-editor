@@ -124,5 +124,6 @@ x .row .canvas-inputs input {
 canvas {
   background-color: white;
   border: 4px solid hsl(188, 93%, 53%);
+  margin-bottom: 50px;
   padding: 1px;
 }
