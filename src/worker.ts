@@ -21,6 +21,7 @@ let fontWidth = fontSize / (10 / 6);
 let rowSize = Math.floor(canvasWidth / fontWidth);
 let fontFamily = "monospace";
 let canvasColor = "#18d9f7";
+let canvasBackgroundColor = "#ffffff";
 let cursorPositionX: number;
 let cursorPositionY: number;
 let eventKey;
@@ -279,6 +280,13 @@ const display = () => {
   // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Paint background color
+  ctx.fillStyle = canvasBackgroundColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Set up canvas color
+  ctx.fillStyle = canvasColor;
+
   // Define content divided by cursor
   aBuffer = buffer.slice(0, gap_left);
   bBuffer = buffer.slice(gap_right + 1);
@@ -361,8 +369,7 @@ const display = () => {
 const setUpCanvas = (
   canvasWidth: number,
   canvasHeight: number,
-  fontSize: number,
-  canvasColor: string
+  fontSize: number
 ) => {
   // canvas size
   canvas.width = canvasWidth + canvasPadding * 2;
@@ -371,7 +378,6 @@ const setUpCanvas = (
   // font style
   ctx.font = fontSize + "px " + fontFamily;
   ctx.textBaseline = "top";
-  ctx.fillStyle = canvasColor;
 };
 
 const maxCanvasSize = () => {
@@ -402,7 +408,7 @@ onmessage = (e) => {
     canvas = e.data[1];
     ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-    setUpCanvas(canvasWidth, canvasHeight, fontSize, canvasColor);
+    setUpCanvas(canvasWidth, canvasHeight, fontSize);
   }
 
   if (e.data[0] === "keydown") {
@@ -455,9 +461,10 @@ onmessage = (e) => {
     canvasHeight = e.data[2];
     fontSize = e.data[3];
     canvasColor = e.data[4];
+    canvasBackgroundColor = e.data[5];
     fontWidth = fontSize / (10 / 6);
     rowSize = Math.floor(canvasWidth / fontWidth);
-    setUpCanvas(canvasWidth, canvasHeight, fontSize, canvasColor);
+    setUpCanvas(canvasWidth, canvasHeight, fontSize);
   }
 
   display();

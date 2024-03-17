@@ -19,6 +19,12 @@ const canvasHeightInput = document.getElementById(
 ) as HTMLInputElement;
 const fontSizeInput = document.getElementById("font-size") as HTMLInputElement;
 const canvasColorInput = document.getElementById("color") as HTMLInputElement;
+const backgroundColorInput = document.getElementById(
+  "background-color"
+) as HTMLInputElement;
+const canvasBackgroundColorInput = document.getElementById(
+  "canvas-background-color"
+) as HTMLInputElement;
 const submitButton = document.getElementById("submit") as HTMLButtonElement;
 const inputs = document.querySelectorAll("input");
 let isAnyInputFocused = false;
@@ -34,21 +40,28 @@ form?.addEventListener("submit", (e) => {
     canvasWidthInput &&
     canvasHeightInput &&
     fontSizeInput &&
-    canvasColorInput
+    canvasColorInput &&
+    backgroundColorInput &&
+    canvasBackgroundColorInput
   ) {
     const canvasWidth = parseInt(canvasWidthInput.value);
     const canvasHeight = parseInt(canvasHeightInput.value);
     const fontSize = parseInt(fontSizeInput.value);
     const canvasColor = canvasColorInput.value;
+    const backgroundColor = backgroundColorInput.value;
+    const canvasBackgroundColor = canvasBackgroundColorInput.value;
 
     if (
       canvasWidthInput &&
       fontSizeInput &&
       canvasColorInput &&
+      backgroundColorInput &&
+      canvasBackgroundColorInput &&
       canvasStyle &&
       submitButton
     ) {
       document.body.style.color = canvasColor;
+      document.body.style.backgroundColor = backgroundColor;
       canvasWidthInput.style.borderColor = canvasColor;
       canvasHeightInput.style.borderColor = canvasColor;
       fontSizeInput.style.borderColor = canvasColor;
@@ -64,6 +77,7 @@ form?.addEventListener("submit", (e) => {
       canvasHeight,
       fontSize,
       canvasColor,
+      canvasBackgroundColor,
     ]);
   }
 });
