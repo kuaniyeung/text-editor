@@ -29,9 +29,7 @@ const submitButton = document.getElementById("submit") as HTMLButtonElement;
 const inputs = document.querySelectorAll("input");
 let isAnyInputFocused = false;
 let windowWidth: number;
-let windowHeight: number;
 let maxCanvasWidth: number;
-let maxCanvasHeight: number;
 
 // Set up form
 form?.addEventListener("submit", (e) => {
@@ -84,14 +82,10 @@ form?.addEventListener("submit", (e) => {
 
 const updateMaxSizes = () => {
   windowWidth = window.innerWidth;
-  windowHeight = window.innerHeight;
   maxCanvasWidth = Math.floor(windowWidth - 40);
-  maxCanvasHeight = Math.floor(windowHeight - 40);
 
-  // Update max attributes of input fields
+  // Update max attributes of input field
   canvasWidthInput.setAttribute("max", maxCanvasWidth.toString());
-  canvasHeightInput.setAttribute("max", maxCanvasHeight.toString());
-  fontSizeInput.setAttribute("max", maxCanvasHeight.toString());
 };
 
 const updateInputValues = () => {
