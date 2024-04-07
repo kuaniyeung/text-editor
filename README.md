@@ -4,7 +4,7 @@ This project implements a **text editor** featuring a sophisticated data structu
 
 ## Features
 - **Gap Buffer Data Structure**: Utilizes a Gap Buffer data structure for efficient text manipulation.
-- **Web Workers**: Harnesses web workers to perform heavy computations in the background, ensuring a smooth editing experience.
+- **Web Workers API**: Harnesses web workers to perform heavy computations in the background, ensuring a smooth editing experience.
 - **Canvas API**: Leveraging the canvas API for rendering text, providing flexibility and performance benefits.
 
 ## Technologies Used
